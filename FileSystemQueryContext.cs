@@ -8,6 +8,10 @@ using System.Threading.Tasks;
 
 namespace LinqFileSystemProvider
 {
+
+    /// <summary>
+    /// <see cref="http://www.la-solutions.co.uk/content/DotNet/DotNet-SimpleLinqDataProvider.htm#Download"/>
+    /// </summary>
     public class FileSystemQueryContext
     {
         internal static object Execute(Expression expression, bool isEnumerable, string root)
