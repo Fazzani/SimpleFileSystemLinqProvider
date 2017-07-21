@@ -10,16 +10,16 @@ namespace LinqFileSystemProvider.Common
 {
     public class Query<T> : IQueryable<T>, IQueryable, IEnumerable<T>, IEnumerable, IOrderedQueryable<T>, IOrderedQueryable
     {
-        QueryProvider provider;
-        Expression expression;
+        QueryProvider _provider;
+        Expression _expression;
 
         public Query(QueryProvider provider)
         {
             if (provider == null)
                 throw new ArgumentNullException("provider");
 
-            this.provider = provider;
-            this.expression = Expression.Constant(this);
+            _provider = provider;
+            _expression = Expression.Constant(this);
         }
 
         public Query(QueryProvider provider, Expression expression)
@@ -33,13 +33,13 @@ namespace LinqFileSystemProvider.Common
             if (!typeof(IQueryable<T>).IsAssignableFrom(expression.Type))
                 throw new ArgumentOutOfRangeException("expression");
 
-            this.provider = provider;
-            this.expression = expression;
+            _provider = provider;
+            _expression = expression;
         }
 
         Expression IQueryable.Expression
         {
-            get { return this.expression; }
+            get { return _expression; }
         }
 
         Type IQueryable.ElementType
@@ -49,22 +49,13 @@ namespace LinqFileSystemProvider.Common
 
         IQueryProvider IQueryable.Provider
         {
-            get { return this.provider; }
+            get { return _provider; }
         }
 
-        public IEnumerator<T> GetEnumerator()
-        {
-            return ((IEnumerable<T>)this.provider.Execute(this.expression)).GetEnumerator();
-        }
+        public IEnumerator<T> GetEnumerator() => ((IEnumerable<T>)_provider.Execute(_expression)).GetEnumerator();
 
-        IEnumerator IEnumerable.GetEnumerator()
-        {
-            return ((IEnumerable)this.provider.Execute(this.expression)).GetEnumerator();
-        }
+        IEnumerator IEnumerable.GetEnumerator() => ((IEnumerable)_provider.Execute(_expression)).GetEnumerator();
 
-        public override string ToString()
-        {
-            return this.provider.GetQueryText(this.expression);
-        }
+        public override string ToString() => _provider.GetQueryText(_expression);
     }
 }

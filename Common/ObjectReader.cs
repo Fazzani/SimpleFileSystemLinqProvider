@@ -12,45 +12,42 @@ namespace LinqFileSystemProvider.Common
 
     internal class ObjectReader<T> : IEnumerable<T>, IEnumerable
     {
-        private IEnumerator<T> enumerator;
+        private IEnumerator<T> _enumerator;
 
         internal ObjectReader(IEnumerable<FileSystemElement> readerEnumerator)
         {
             Type outType = typeof(T);
             if (outType == typeof(FileSystemElement))
-                this.enumerator = readerEnumerator.GetEnumerator() as IEnumerator<T>;
+                _enumerator = readerEnumerator.GetEnumerator() as IEnumerator<T>;
             else
-                this.enumerator = new Enumerator(readerEnumerator.GetEnumerator());
+                _enumerator = new Enumerator(readerEnumerator.GetEnumerator());
         }
 
         public IEnumerator<T> GetEnumerator()
         {
-            IEnumerator<T> e = this.enumerator;
+            IEnumerator<T> e = _enumerator;
 
             if (e == null)
                 throw new InvalidOperationException("Cannot enumerate more than once");
 
-            this.enumerator = null;
+            _enumerator = null;
             return e;
         }
 
-        IEnumerator IEnumerable.GetEnumerator()
-        {
-            return this.GetEnumerator();
-        }
+        IEnumerator IEnumerable.GetEnumerator() => this.GetEnumerator();
 
         private class Enumerator : IEnumerator<T>, IEnumerator, IDisposable
         {
-            readonly Type outType = typeof(T);
-            private IEnumerator<FileSystemElement> reader;
-            private FieldInfo[] fields;
-            private int[] fieldLookup;
-            readonly PropertyInfo[] fsFields = typeof(FileSystemElement).GetProperties();
+            readonly Type  _outType = typeof(T);
+            private IEnumerator<FileSystemElement> _reader;
+            private FieldInfo[] _fields;
+            private int[] _fieldLookup;
+            readonly PropertyInfo[] _fsFields = typeof(FileSystemElement).GetProperties();
 
             internal Enumerator(IEnumerator<FileSystemElement> reader)
             {
-                this.reader = reader;
-                this.fields = typeof(T).GetRuntimeFields().ToArray();
+                _reader = reader;
+                _fields = typeof(T).GetRuntimeFields().ToArray();
             }
 
             public T Current { get; private set; }
@@ -59,35 +56,26 @@ namespace LinqFileSystemProvider.Common
 
             public bool MoveNext()
             {
-                if (this.reader.MoveNext())
+                if (_reader.MoveNext())
                 {
-                    if (this.fieldLookup == null)
-                        this.InitFieldLookup();
+                    if (_fieldLookup == null)
+                        InitFieldLookup();
 
                     T instance = TypeSystem.New<T>.Instance();
-                    //if (TypeSystem.IsAnonymousType(outType))
-                    //{
-                    //    instance = (T)FormatterServices.GetUninitializedObject(outType);
-                    //}
-                    //else if (!outType.IsAssignableFrom(typeof(string)))
-                    //    instance = Activator.CreateInstance<T>();
 
-                    //if (instance == null)
-                    //    instance = reader.Current.ToString();
-                    //else
-                        for (int i = 0, n = this.fields.Length; i < n; i++)
+                    for (int i = 0, n = _fields.Length; i < n; i++)
+                    {
+                        int index = _fieldLookup[i];
+                        if (index >= 0)
                         {
-                            int index = this.fieldLookup[i];
-                            if (index >= 0)
-                            {
-                                var fi = this.fields[i];
-                                var fsField = fsFields[i];
-                                if (fsField == null)
-                                    fi.SetValue(instance, null);
-                                else
-                                    fi.SetValue(instance, fsField.GetValue(reader.Current));
-                            }
+                            var fi = this._fields[i];
+                            var fsField = _fsFields[i];
+                            if (fsField == null)
+                                fi.SetValue(instance, null);
+                            else
+                                fi.SetValue(instance, fsField.GetValue(_reader.Current));
                         }
+                    }
 
                     this.Current = instance;
                     return true;
@@ -95,30 +83,27 @@ namespace LinqFileSystemProvider.Common
                 return false;
             }
 
-           
+            public void Reset() => _reader.Reset();
 
-            public void Reset() => reader.Reset();
-
-            public void Dispose() => reader.Dispose();
+            public void Dispose() => _reader.Dispose();
 
             private void InitFieldLookup()
             {
                 var map = new Dictionary<string, int>(StringComparer.InvariantCultureIgnoreCase);
 
-                for (int i = 0, n = this.fsFields.Length; i < n; i++)
-                    map.Add(fsFields[i].Name, i);
+                for (int i = 0, n = _fsFields.Length; i < n; i++)
+                    map.Add(_fsFields[i].Name, i);
 
-                this.fieldLookup = new int[this.fields.Length];
+                _fieldLookup = new int[_fields.Length];
 
-                for (int i = 0, n = this.fields.Length; i < n; i++)
+                for (int i = 0, n = _fields.Length; i < n; i++)
                 {
-                    int index;
-                    string result = new Regex("<(.+)>(.*)$").Replace(this.fields[i].Name, "$1");
+                    string result = new Regex("<(.+)>(.*)$").Replace(_fields[i].Name, "$1");
 
-                    if (map.TryGetValue(result, out index))
-                        this.fieldLookup[i] = index;
+                    if (map.TryGetValue(result, out int index))
+                        _fieldLookup[i] = index;
                     else
-                        this.fieldLookup[i] = -1;
+                        _fieldLookup[i] = -1;
                 }
             }
         }

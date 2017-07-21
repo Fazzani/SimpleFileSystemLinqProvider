@@ -19,27 +19,6 @@ namespace LinqFileSystemProvider
             this.root = root;
         }
 
-        //public IQueryable CreateQuery(Expression expression)
-        //{
-        //    return new FileSystemContext(this, expression);
-        //}
-
-        //public IQueryable<TElement> CreateQuery<TElement>(Expression expression)
-        //{
-        //    return (IQueryable<TElement>)new FileSystemContext(this, expression);
-        //}
-
-        //public object Execute(Expression expression)
-        //{
-        //    return Execute<FileSystemElement>(expression);
-        //}
-
-        //public TResult Execute<TResult>(Expression expression)
-        //{
-        //    var isEnumerable = (typeof(TResult).Name == "IEnumerable`1");
-        //    return (TResult)FileSystemQueryContext.Execute(expression, isEnumerable, root);
-        //}
-
         public override object Execute(Expression expression)
         {
             Type elementType = TypeSystem.GetElementType(expression.Type);
