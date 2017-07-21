@@ -19,13 +19,24 @@ namespace LinqFileSystemProvider
             if (0 < args.Count())
             {
                 var query = from element in new FileSystemContext(args[0])
+                            where element.ElementType == ElementType.File && element.Path.EndsWith(".m3u")
+                            orderby element.Path ascending
+                            select new { element.Path };
+
+                //Not Yet Supported
+                var query1 = from element in new FileSystemContext(args[0])
+                            where element.ElementType == ElementType.File && element.Path.EndsWith(".zip")
+                            orderby element.Path ascending
+                            select element.Path;
+
+                var query2 = from element in new FileSystemContext(args[0])
                             where element.ElementType == ElementType.File && element.Path.EndsWith(".zip")
                             orderby element.Path ascending
                             select element;
 
                 int i = 0;
 
-                foreach (var result in query)
+                foreach (var result in query1)
                 {
                     StringBuilder s = new StringBuilder();
                     s.AppendFormat("Result {0} '{1}'", ++i, result.ToString());
@@ -37,7 +48,7 @@ namespace LinqFileSystemProvider
             }
             else 
             {
-                System.Console.WriteLine("Usage: LinqFileSystemProvider <root folder name>");
+                Console.WriteLine("Usage: LinqFileSystemProvider <root folder name>");
             }
             Console.ReadKey();
          }

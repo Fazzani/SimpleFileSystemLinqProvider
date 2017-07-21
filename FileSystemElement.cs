@@ -18,6 +18,10 @@ namespace LinqFileSystemProvider
         public string Path { get; private set; }
         public abstract ElementType ElementType { get; }
 
+        public FileSystemElement()
+        {
+
+        }
         protected FileSystemElement(string path)
         {
             Path = path;
