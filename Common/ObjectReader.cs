@@ -9,7 +9,7 @@ using System.Text.RegularExpressions;
 
 namespace LinqFileSystemProvider.Common
 {
-
+    //TODO: Add projected generic type to ObjectReader<T, ProjectT>
     internal class ObjectReader<T> : IEnumerable<T>, IEnumerable
     {
         private IEnumerator<T> _enumerator;
@@ -18,11 +18,7 @@ namespace LinqFileSystemProvider.Common
         {
             Type outType = typeof(T);
             _context = context;
-            var res = context.WhereExpression != null ? context.Source.Where(context.WhereExpression) : context.Source;
-            if (outType == typeof(FileSystemElement))
-                _enumerator = context.Source.GetEnumerator() as IEnumerator<T>;
-            else
-                _enumerator = new Enumerator(_context);
+            _enumerator = new Enumerator(context);
         }
 
         public IEnumerator<T> GetEnumerator()
@@ -50,7 +46,7 @@ namespace LinqFileSystemProvider.Common
             internal Enumerator(TranslationContext<FileSystemElement> context)
             {
                 _context = context;
-                _reader = context.Source.GetEnumerator();
+                _reader = (context.WhereExpression != null ? context.Source.Where(context.WhereExpression) : context.Source).GetEnumerator();
                 _fields = typeof(T).GetRuntimeFields().ToArray();
             }
 

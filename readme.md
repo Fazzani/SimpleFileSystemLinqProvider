@@ -14,3 +14,4 @@ ____________________________________
 ***TODO***
 
 - [ ] Unit test project
+- [ ] Mapping to object

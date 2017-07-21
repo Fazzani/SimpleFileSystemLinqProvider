@@ -15,7 +15,7 @@ namespace LinqFileSystemProvider
     {
         static void Main(string[] args)
         {
-            System.Console.WriteLine("LinqFileSystemProvider");
+            Console.WriteLine("LinqFileSystemProvider");
             if (0 < args.Count())
             {
                 var query = from element in new FileSystemContext(args[0])
@@ -24,46 +24,23 @@ namespace LinqFileSystemProvider
                             select new { element.Path };
 
                 var query1 = from element in new FileSystemContext(args[0])
-                            where element.ElementType == ElementType.File && element.Path.EndsWith(".zip")
-                            orderby element.Path ascending
-                            select element.Path;
+                             where element.ElementType == ElementType.File && element.Path.EndsWith(".zip")
+                             orderby element.Path ascending
+                             select element.Path;
 
                 var query2 = from element in new FileSystemContext(args[0])
-                            where element.ElementType == ElementType.File && element.Path.EndsWith(".zip")
-                            orderby element.Path ascending
-                            select element;
-
-                int i = 0;
+                             where element.ElementType == ElementType.File && element.Path.EndsWith(".zip")
+                             orderby element.Path ascending
+                             select element;
 
                 foreach (var result in query1)
-                {
-                    StringBuilder s = new StringBuilder();
-                    s.AppendFormat("Result {0} '{1}'", ++i, result.ToString());
-                    System.Console.WriteLine(s.ToString());
-                }
-                //  The following code works and serves to confirm that 
-                //  FileSystemContext.GetEnumerator() does what you expect.
-                //TraceFileSystem(args[0]);
+                    Console.WriteLine($"Result '{result.ToString()}'");
             }
-            else 
+            else
             {
                 Console.WriteLine("Usage: LinqFileSystemProvider <root folder name>");
             }
             Console.ReadKey();
-         }
-
-        static void TraceFileSystem(string root)
-        {
-            var query = FileSystemQueryContext.GetAllFilesAndFolders(root).AsEnumerable<FileSystemElement>();
-            int i = 0;
-            int n;
-            for (n = 0; n != query.Count(); ++n)
-            {
-                var result = query.ElementAt(n);
-                StringBuilder s = new StringBuilder();
-                s.AppendFormat("Result {0,3} '{1}'", ++i, result.ToString());
-                System.Console.WriteLine(s.ToString());
-            }
         }
     }
 }
