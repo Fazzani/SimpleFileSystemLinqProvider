@@ -8,6 +8,8 @@ ____________________________________
 - [ ] Take
 - [ ] Skip
 - [ ] OrderBy (asc, desc)
+- [ ] Single
+- [ ] First, FirstOrDefault
 
 ***TODO***
 

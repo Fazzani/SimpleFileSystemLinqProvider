@@ -36,7 +36,7 @@ namespace LinqFileSystemProvider
 
                 int i = 0;
 
-                foreach (var result in query1)
+                foreach (var result in query2)
                 {
                     StringBuilder s = new StringBuilder();
                     s.AppendFormat("Result {0} '{1}'", ++i, result.ToString());

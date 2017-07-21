@@ -64,13 +64,14 @@ namespace LinqFileSystemProvider.Common
                     if (this.fieldLookup == null)
                         this.InitFieldLookup();
 
-                    T instance = default(T);
-                    if (TypeSystem.IsAnonymousType(outType))
-                    {
-                        instance = (T)FormatterServices.GetUninitializedObject(outType);
-                    }
-                    else if (!outType.IsAssignableFrom(typeof(string)))
-                        instance = Activator.CreateInstance<T>();
+                    T instance = TypeSystem.New<T>.Instance();
+                    //if (TypeSystem.IsAnonymousType(outType))
+                    //{
+                    //    instance = (T)FormatterServices.GetUninitializedObject(outType);
+                    //}
+                    //else if (!outType.IsAssignableFrom(typeof(string)))
+                    //    instance = Activator.CreateInstance<T>();
+
                     //if (instance == null)
                     //    instance = reader.Current.ToString();
                     //else
@@ -93,6 +94,8 @@ namespace LinqFileSystemProvider.Common
                 }
                 return false;
             }
+
+           
 
             public void Reset() => reader.Reset();
 
