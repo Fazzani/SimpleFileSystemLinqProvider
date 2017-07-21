@@ -10,7 +10,9 @@ namespace LinqFileSystemProvider
     internal class ExpressionTreeModifier : ExpressionVisitor
     {
         private IQueryable<FileSystemElement> fileSystemElements;
-        public LambdaExpression WhereExpression;
+        public LambdaExpression WhereExpression { get; private set; }
+        public LambdaExpression SelectExpression { get; private set; }
+
         internal ExpressionTreeModifier(IQueryable<FileSystemElement> elements)
         {
             //System.Console.WriteLine("ExpressionTreeModifier()");
@@ -25,13 +27,16 @@ namespace LinqFileSystemProvider
                 switch (m.Method.Name)
                 {
                     case "Select":
+                        Visit(m.Arguments[0]);
+                        SelectExpression = (LambdaExpression)StripQuotes(m.Arguments[1]);
+                        //Visit(SelectExpression.Body);
+                        return m;
                     case "OrderBy":
                         Visit(m.Arguments[0]);
                         return m;
                     case "Where":
-                        LambdaExpression lambda = (LambdaExpression)StripQuotes(m.Arguments[1]);
-                        WhereExpression = lambda;
-                        this.Visit(lambda.Body);
+                        WhereExpression = (LambdaExpression)StripQuotes(m.Arguments[1]);
+                        Visit(WhereExpression.Body);
                         return m;
                 }
 

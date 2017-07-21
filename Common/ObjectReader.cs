@@ -13,14 +13,16 @@ namespace LinqFileSystemProvider.Common
     internal class ObjectReader<T> : IEnumerable<T>, IEnumerable
     {
         private IEnumerator<T> _enumerator;
-
-        internal ObjectReader(IEnumerable<FileSystemElement> readerEnumerator)
+        TranslationContext<FileSystemElement> _context;
+        internal ObjectReader(TranslationContext<FileSystemElement> context)
         {
             Type outType = typeof(T);
+            _context = context;
+            var res = context.WhereExpression != null ? context.Source.Where(context.WhereExpression) : context.Source;
             if (outType == typeof(FileSystemElement))
-                _enumerator = readerEnumerator.GetEnumerator() as IEnumerator<T>;
+                _enumerator = context.Source.GetEnumerator() as IEnumerator<T>;
             else
-                _enumerator = new Enumerator(readerEnumerator.GetEnumerator());
+                _enumerator = new Enumerator(_context);
         }
 
         public IEnumerator<T> GetEnumerator()
@@ -38,15 +40,17 @@ namespace LinqFileSystemProvider.Common
 
         private class Enumerator : IEnumerator<T>, IEnumerator, IDisposable
         {
-            readonly Type  _outType = typeof(T);
+            TranslationContext<FileSystemElement> _context;
+            readonly Type _outType = typeof(T);
             private IEnumerator<FileSystemElement> _reader;
             private FieldInfo[] _fields;
             private int[] _fieldLookup;
             readonly PropertyInfo[] _fsFields = typeof(FileSystemElement).GetProperties();
 
-            internal Enumerator(IEnumerator<FileSystemElement> reader)
+            internal Enumerator(TranslationContext<FileSystemElement> context)
             {
-                _reader = reader;
+                _context = context;
+                _reader = context.Source.GetEnumerator();
                 _fields = typeof(T).GetRuntimeFields().ToArray();
             }
 
@@ -58,22 +62,31 @@ namespace LinqFileSystemProvider.Common
             {
                 if (_reader.MoveNext())
                 {
-                    if (_fieldLookup == null)
-                        InitFieldLookup();
-
                     T instance = TypeSystem.New<T>.Instance();
 
-                    for (int i = 0, n = _fields.Length; i < n; i++)
+                    if ((typeof(T).IsValueType || typeof(T).IsAssignableFrom(typeof(string))) && _context.SelectedMembers != null)
                     {
-                        int index = _fieldLookup[i];
-                        if (index >= 0)
+                        var selectedProp = _fsFields.FirstOrDefault(x => x.Name == _context.SelectedMembers.FirstOrDefault());
+                        if (selectedProp != null)
+                            instance = (T)selectedProp.GetValue(_reader.Current);
+                    }
+                    else
+                    {
+                        if (_fieldLookup == null)
+                            InitFieldLookup();
+
+                        for (int i = 0, n = _fields.Length; i < n; i++)
                         {
-                            var fi = this._fields[i];
-                            var fsField = _fsFields[i];
-                            if (fsField == null)
-                                fi.SetValue(instance, null);
-                            else
-                                fi.SetValue(instance, fsField.GetValue(_reader.Current));
+                            int index = _fieldLookup[i];
+                            if (index >= 0)
+                            {
+                                var fi = _fields[i];
+                                var fsField = _fsFields[i];
+                                if (fsField == null)
+                                    fi.SetValue(instance, null);
+                                else
+                                    fi.SetValue(instance, fsField.GetValue(_reader.Current));
+                            }
                         }
                     }
 
@@ -107,6 +120,5 @@ namespace LinqFileSystemProvider.Common
                 }
             }
         }
-
     }
 }

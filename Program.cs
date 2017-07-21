@@ -23,7 +23,6 @@ namespace LinqFileSystemProvider
                             orderby element.Path ascending
                             select new { element.Path };
 
-                //Not Yet Supported
                 var query1 = from element in new FileSystemContext(args[0])
                             where element.ElementType == ElementType.File && element.Path.EndsWith(".zip")
                             orderby element.Path ascending
@@ -36,7 +35,7 @@ namespace LinqFileSystemProvider
 
                 int i = 0;
 
-                foreach (var result in query2)
+                foreach (var result in query1)
                 {
                     StringBuilder s = new StringBuilder();
                     s.AppendFormat("Result {0} '{1}'", ++i, result.ToString());

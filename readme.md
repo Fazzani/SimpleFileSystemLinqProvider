@@ -3,7 +3,7 @@ ____________________________________
 
 ***Supported Methods***
 
-- [x] Select (simple property not yet)
+- [x] Select
 - [x] Where
 - [ ] Take
 - [ ] Skip

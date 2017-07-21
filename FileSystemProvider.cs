@@ -24,12 +24,12 @@ namespace LinqFileSystemProvider
             Type elementType = TypeSystem.GetElementType(expression.Type);
             var isEnumerable = elementType.Name == "IEnumerable`1";
 
-            var reader = FileSystemQueryContext.Execute<FileSystemElement>(expression, isEnumerable, root);
+            var context = FileSystemQueryContext.Execute<FileSystemElement>(expression, isEnumerable, root);
             
             return Activator.CreateInstance(
                 typeof(ObjectReader<>).MakeGenericType(elementType),
                 BindingFlags.Instance | BindingFlags.NonPublic, null,
-                new object[] { reader },
+                new object[] { context },
                 null);
         }
 

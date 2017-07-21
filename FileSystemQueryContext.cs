@@ -19,10 +19,15 @@ namespace LinqFileSystemProvider
         {
             var queryableElements = GetAllFilesAndFolders(root);
             var treeCopier = new ExpressionTreeModifier(queryableElements);
+            var selectedMembersVisitor = new SelectedMembersVisitor();
             var newExpressionTree = treeCopier.Visit(expression);
-            if (treeCopier.WhereExpression == null)
-                return queryableElements;
-            return queryableElements.Where(treeCopier.WhereExpression as Expression<Func<FileSystemElement, bool>>);
+            selectedMembersVisitor.Visit(treeCopier.SelectExpression);
+            //TODO: catch the functions : OrderBy, Take, first, Single
+            var context = new TranslationContext<FileSystemElement>(queryableElements, treeCopier.WhereExpression as Expression<Func<FileSystemElement, bool>>, selectedMembersVisitor.Members);
+            //if (treeCopier.WhereExpression == null)
+            //    return queryableElements;
+            //return queryableElements.Where(treeCopier.WhereExpression as Expression<Func<FileSystemElement, bool>>);
+            return context;
         }
 
         public static IQueryable<FileSystemElement> GetAllFilesAndFolders(string root)
