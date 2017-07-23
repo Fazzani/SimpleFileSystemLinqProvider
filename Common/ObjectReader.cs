@@ -9,14 +9,13 @@ using System.Text.RegularExpressions;
 
 namespace LinqFileSystemProvider.Common
 {
-    //TODO: Add projected generic type to ObjectReader<T, ProjectT>
+    //TODO: Add projected generic type to ObjectReader<T, ProjectT> => remove FileSystemElement as static Type
     internal class ObjectReader<T> : IEnumerable<T>, IEnumerable
     {
         private IEnumerator<T> _enumerator;
         TranslationContext<FileSystemElement> _context;
         internal ObjectReader(TranslationContext<FileSystemElement> context)
         {
-            Type outType = typeof(T);
             _context = context;
             _enumerator = new Enumerator(context);
         }

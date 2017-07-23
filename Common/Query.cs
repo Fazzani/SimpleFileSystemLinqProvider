@@ -15,25 +15,19 @@ namespace LinqFileSystemProvider.Common
 
         public Query(QueryProvider provider)
         {
-            if (provider == null)
-                throw new ArgumentNullException("provider");
-
-            _provider = provider;
+            _provider = provider ?? throw new ArgumentNullException("provider");
             _expression = Expression.Constant(this);
         }
 
         public Query(QueryProvider provider, Expression expression)
         {
-            if (provider == null)
-                throw new ArgumentNullException("provider");
-
             if (expression == null)
                 throw new ArgumentNullException("expression");
 
             if (!typeof(IQueryable<T>).IsAssignableFrom(expression.Type))
                 throw new ArgumentOutOfRangeException("expression");
 
-            _provider = provider;
+            _provider = provider ?? throw new ArgumentNullException("provider");
             _expression = expression;
         }
 

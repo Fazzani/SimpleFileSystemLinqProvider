@@ -8,8 +8,9 @@ ____________________________________
 - [ ] Take
 - [ ] Skip
 - [ ] OrderBy (asc, desc)
-- [ ] Single
+- [ ] Single, SingleOrDdefault
 - [ ] First, FirstOrDefault
+- [ ] SubQuery
 
 ***TODO***
 
